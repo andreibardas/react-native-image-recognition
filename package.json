@@ -1,0 +1,48 @@
+{
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "eject": "expo eject"
+  },
+  "dependencies": {
+    "@react-native-community/async-storage": "^1.8.1",
+    "@tensorflow-models/mobilenet": "^2.0.4",
+    "@tensorflow/tfjs": "^1.7.0",
+    "@tensorflow/tfjs-react-native": "^0.2.3",
+    "expo": "~36.0.0",
+    "expo-camera": "~8.0.0",
+    "expo-constants": "~8.0.0",
+    "expo-gl": "^8.0.0",
+    "expo-image-picker": "~8.0.1",
+    "expo-permissions": "~8.0.0",
+    "https-browserify": "0.0.1",
+    "jpeg-js": "^0.3.7",
+    "react": "~16.9.0",
+    "react-dom": "~16.9.0",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-36.0.0.tar.gz",
+    "react-native-crypto": "^2.1.0",
+    "react-native-fs": "^2.16.6",
+    "react-native-level-fs": "^3.0.0",
+    "react-native-randombytes": "^3.0.0",
+    "react-native-web": "~0.11.7",
+    "rn-nodeify": "^10.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "babel-preset-expo": "~8.0.0"
+  },
+  "private": true,
+  "react-native": {
+    "crypto": "react-native-crypto",
+    "https": "https-browserify",
+    "fs": "react-native-level-fs"
+  },
+  "browser": {
+    "crypto": "react-native-crypto",
+    "https": "https-browserify",
+    "fs": "react-native-level-fs"
+  }
+}
