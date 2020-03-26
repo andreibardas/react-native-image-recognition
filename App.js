@@ -12,12 +12,12 @@ import { fetch } from '@tensorflow/tfjs-react-native';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 
 // import 'react-native-get-random-values';
-import uuid from 'uuid';
+// import uuid from 'uuid';
 
 
 const VISION_API_KEY = "AIzaSyC4u5OHO-ZliWNyK7Sx03kvT75J_QbeK5E";
 
-YellowBox.ignoreWarnings(['Setting a timer'])
+// YellowBox.ignoreWarnings(['Setting a timer'])
 
 async function uploadImageAsync(uri) {
   const blob = await new Promise((resolve, reject) => {
@@ -51,11 +51,10 @@ class App extends Component {
     hasGrantedCameraRollPermission: false,
     image: null,
     uploading: false,
-    googleResponse: false,
     isTfReady: false,
     isModelReady: false,
     predictions: null,
-    image: null,
+    // image: null,
     imageURL: ''
   }
 
@@ -144,25 +143,6 @@ renderPrediction = prediction => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   cameraRollAccess = async () => {
     const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
     // console.log('camera roll status', status)
@@ -213,91 +193,19 @@ renderPrediction = prediction => {
     }
   }
 
-  submitToGoogle = async () => {
-    try {
-      this.setState({ uploading: true })
-      let { image } = this.state
-      let body = JSON.stringify({
-        requests: [
-          {
-            features: [{ type: 'LABEL_DETECTION', maxResults: 1 }],
-            image: {
-              source: {
-                imageUri: image
-              }
-            }
-          }
-        ]
-      })
-      let response = await fetch(
-        `https://vision.googleapis.com/v1/images:annotate?key=${VISION_API_KEY}`,
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          method: 'POST',
-          body: body
-        }
-      )
-      let responseJson = await response.json()
-      // console.log(responseJson)
-      const getLabel = responseJson.responses[0].labelAnnotations.map(
-        obj => obj.description
-      )
 
-      // console.log('getLabel', getLabel)
-      let result =
-        getLabel.includes('Hot dog') ||
-        getLabel.includes('hot dog') ||
-        getLabel.includes('Hot dog bun')
-      // console.log(result)
-
-      this.setState({
-        googleResponse: result,
-        uploading: false
-      })
-    } catch (error) {
-      console.log(error)
-    }
-  }
 
   renderImage = () => {
     let { image, googleResponse, } = this.state
     if (!image) {
       return (
         <View style={styles.renderImageContainer}>
-          {/* <Button
-            buttonStyle={styles.button}
-            onPress={() => this.submitToGoogle()}
-            title='Check'
-            titleStyle={styles.buttonTitle}
-            disabled
-          /> */}
-          {/* <View style={styles.imageContainer}>
-          </View> */}
         </View>
       )
     }
 
     return (
       <View style={styles.renderImageContainer}>
-        {/* <Button
-          buttonStyle={styles.button}
-          onPress={() => this.submitToGoogle()}
-          title='Check'
-          titleStyle={styles.buttonTitle}
-        /> */}
-
-        {/* <View style={styles.imageContainer}>
-          <Image source={{ uri: image }} style={styles.imageDisplay} />
-        </View> */}
-
-        {/* {googleResponse ? (
-          <Text style={styles.hotdogEmoji}>🌭</Text>
-        ) : (
-          <Text style={styles.hotdogEmoji}>❌</Text>
-        )} */}
       </View>
     )
   }
