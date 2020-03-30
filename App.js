@@ -10,12 +10,28 @@ import * as jpeg from 'jpeg-js';
 import * as tf from '@tensorflow/tfjs';
 import { fetch } from '@tensorflow/tfjs-react-native';
 import * as mobilenet from '@tensorflow-models/mobilenet';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 // import 'react-native-get-random-values';
 // import uuid from 'uuid';
 
 
 const VISION_API_KEY = "AIzaSyC4u5OHO-ZliWNyK7Sx03kvT75J_QbeK5E";
+
+let BASE64_MARKER = ';base64,';
+
+function convertDataURIToBinary(dataURI) {
+  var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+  var base64 = dataURI.substring(base64Index);
+  var raw = window.atob(base64);
+  var rawLength = raw.length;
+  var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+  for(i = 0; i < rawLength; i++) {
+    array[i] = raw.charCodeAt(i);
+  }
+  return array;
+}
 
 // YellowBox.ignoreWarnings(['Setting a timer'])
 
@@ -55,7 +71,8 @@ class App extends Component {
     isModelReady: false,
     predictions: null,
     // image: null,
-    imageURL: ''
+    imageURL: '',
+    imageBinary: ''
   }
 
   async componentDidMount() {
@@ -103,9 +120,9 @@ imageToTensor(rawImageData) {
 
 classifyImage = async () => {
   try {
-    const imageAssetPath = Image.resolveAssetSource(this.state.image)
-    const response = await fetch( this.state.image, {}, { isBinary: true })
-    const rawImageData = await response.arrayBuffer()
+    // const imageAssetPath = Image.resolveAssetSource(this.state.image)
+    const response = await fetch( this.state.image, {}, { isBinary: true }) // aici downloadezi imagine in binary
+    const rawImageData = await response.arrayBuffer() // daca gasesti o metoda similara sa iti ia imaginea din galeria telefonului
     const imageTensor = this.imageToTensor(rawImageData)
     const predictions = await this.model.classify(imageTensor)
     this.setState({ predictions })
@@ -182,8 +199,33 @@ renderPrediction = prediction => {
       this.setState({ uploading: true })
 
       if (!pickerResult.cancelled) {
-        uploadUrl = await uploadImageAsync(pickerResult.uri)
-        this.setState({ image: uploadUrl })
+        // uploadUrl = await uploadImageAsync(pickerResult.uri) // upoad image by uri
+        
+         imageBase = await ImageManipulator.manipulateAsync(pickerResult.uri, [], { base64: true })
+        // image8Bin = this.convertDataURIToBinary(imageBase);
+         uploadUrl = await uploadImageAsync(imageBase.uri) // upoad image by uri
+        // console.log('base64res' + JSON.stringify(imageMan));
+
+        
+
+
+
+
+        // uploadByte = await uploadImageAsync(pickerResult.imageBinary)
+        // get imagebinary from uri
+        /*
+        const RNFS = require("react-native-fs");
+        RNFS.readFile(response.uri, "base64").then(data => {
+          console.log(data);
+        });*/
+        // tensor....
+        // console.log(uploadUrl);
+        // console.log(uploadByte)
+        // console.log(image8Bin);
+         this.setState({ image: uploadUrl })
+         this.setState({ imageBinary: imageBase })
+        // this.setState({imageBinary: imageBase})
+        // this.setState({imageBinary: uploadByte})
       }
     } catch (error) {
       console.log(error)
@@ -193,8 +235,13 @@ renderPrediction = prediction => {
     }
   }
 
+  
+
+  
 
 
+
+/*
   renderImage = () => {
     let { image, googleResponse, } = this.state
     if (!image) {
@@ -209,10 +256,11 @@ renderPrediction = prediction => {
       </View>
     )
   }
+*/
 
   render() {
 
-    const { isTfReady, isModelReady, predictions, image } = this.state
+    const { isTfReady, isModelReady, predictions, image, imageBinary, response } = this.state
 
     const {
       hasGrantedCameraPermission,
@@ -231,6 +279,7 @@ renderPrediction = prediction => {
       )
     } else {
       return (
+
         <View style={styles.container}>
           <Header
             statusBarProps={{ barStyle: 'light-content' }}
@@ -250,7 +299,7 @@ renderPrediction = prediction => {
               </TouchableOpacity>
             }
           />
-          {this.renderImage()}
+          {/* {this.renderImage()} */}
           {uploading ? <UploadingOverlay /> : null}
 
           <StatusBar barStyle='light-content' />
@@ -275,7 +324,7 @@ renderPrediction = prediction => {
       onChangeText={this.handleURL}
     /> */}
     
-            <Text style={{color: 'white', margin: 20}}>{this.state.imageURL}</Text>
+            {/* <Text style={{color: 'white', margin: 20}}>{this.state.imageURL}</Text> */}
 
 
 
@@ -283,7 +332,7 @@ renderPrediction = prediction => {
           style={styles.imageWrapper}
           onPress={isModelReady ? this.selectImage : undefined}>
 
-          {image && <Image source={image} style={styles.imageContainer} />}
+          {image && <Image source={imageBinary} style={styles.imageContainer} />}
 
           {/* {isModelReady && image && (
             <Text style={styles.transparentText}>Tap to choose image</Text>
@@ -329,14 +378,14 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#97caef',
     borderRadius: 10,
-    width: 150,
-    height: 50
+    width: 300,
+    height: 300
   },
   buttonTitle: {
     fontWeight: '600'
   },
   imageContainer: {
-    margin: 25,
+    margin: 0,
     alignItems: 'center'
   },
   imageDisplay: {
@@ -351,7 +400,7 @@ const styles = StyleSheet.create({
     fontSize: 90
   },
   loadingContainer: {
-    marginTop: 80,
+    marginTop: 50,
     justifyContent: 'center'
   },
   text: {
@@ -363,21 +412,21 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   imageWrapper: {
-    width: 280,
-    height: 50,
-    padding: 10,
+    width: 300,
+    height: 300,
+    padding: 0,
     borderColor: '#cf667f',
     borderWidth: 5,
     borderStyle: 'dashed',
-    marginTop: 40,
+    marginTop: 10,
     marginBottom: 10,
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center'
   },
   imageContainer: {
-    width: 250,
-    height: 250,
+    width: 270,
+    height: 270,
     position: 'absolute',
     top: 10,
     left: 10,
